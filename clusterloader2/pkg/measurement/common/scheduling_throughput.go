@@ -18,7 +18,7 @@ package common
 
 import (
 	"fmt"
-	"math"
+//	"math"
 	"sort"
 	"time"
 
@@ -151,9 +151,18 @@ func (s *schedulingThroughputMeasurement) gather(threshold float64) ([]measureme
 	throughputSummary := &schedulingThroughput{}
 	if length := len(s.schedulingThroughputs); length > 0 {
 		sort.Float64s(s.schedulingThroughputs)
-		throughputSummary.Perc50 = s.schedulingThroughputs[int(math.Ceil(float64(length*50)/100))-1]
-		throughputSummary.Perc90 = s.schedulingThroughputs[int(math.Ceil(float64(length*90)/100))-1]
-		throughputSummary.Perc99 = s.schedulingThroughputs[int(math.Ceil(float64(length*99)/100))-1]
+                sum := 0.0
+                for _, val := range s.schedulingThroughputs {
+                        sum += val
+                }
+                throughputSummary.Perc90 = float64(sum) / float64(length)
+                throughputSummary.Perc50 = s.schedulingThroughputs[0]
+                throughputSummary.Perc99 = s.schedulingThroughputs[length-1]
+
+
+//              throughputSummary.Perc50 = s.schedulingThroughputs[int(math.Ceil(float64(length*50)/100))-1]
+//              throughputSummary.Perc90 = s.schedulingThroughputs[int(math.Ceil(float64(length*90)/100))-1]
+//              throughputSummary.Perc99 = s.schedulingThroughputs[int(math.Ceil(float64(length*99)/100))-1]
 		throughputSummary.Max = s.schedulingThroughputs[length-1]
 	}
 	content, err := util.PrettyPrintJSON(throughputSummary)
